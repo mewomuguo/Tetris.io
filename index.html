@@ -1,13 +1,12 @@
 <!DOCTYPE html>
-<html lang="en"> <!-- 預設為 en，JS 會自動依據系統更改 -->
-<head>
+<html lang="en"> <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"/>
   <title>Tetris</title>
   <style>
     body {
       margin: 0;
-      padding: 20px;
+      padding: 10px;
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
       background: #222;
       color: #fff;
@@ -15,24 +14,37 @@
       display: flex;
       flex-direction: column;
       align-items: center;
+      /* 防止整個畫面被長按選取或拖曳 */
+      user-select: none;
+      -webkit-user-select: none;
+      touch-action: none; 
     }
     h1 {
-      margin-top: 0;
+      margin-top: 10px;
+      margin-bottom: 10px;
       color: #0CF;
       text-shadow: 0 0 10px rgba(0, 204, 255, 0.5);
+      font-size: 28px;
     }
     #game-wrapper {
       position: relative;
-      display: inline-block;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      width: 100%;
+      max-width: 500px;
     }
     #game-container {
       display: flex;
-      gap: 20px;
+      gap: 15px;
       background: #111;
       border-radius: 10px;
-      padding: 20px;
+      padding: 15px;
       box-shadow: 0 0 20px rgba(0,0,0,0.8);
       align-items: flex-start;
+      justify-content: center;
+      width: fit-content;
+      margin: 0 auto;
     }
     #canvas-container {
       position: relative;
@@ -67,24 +79,24 @@
       display: flex;
       flex-direction: column;
       justify-content: space-between;
-      min-height: 400px;
-      width: 150px;
+      height: 400px;
+      width: 120px;
     }
     #info {
       background: #222;
-      padding: 15px;
+      padding: 10px;
       border-radius: 8px;
       border: 1px solid #333;
       text-align: left;
     }
     #info p {
-      margin: 10px 0;
-      font-size: 16px;
+      margin: 5px 0;
+      font-size: 14px;
       font-weight: bold;
     }
     #info span {
       color: #0CF;
-      font-size: 20px;
+      font-size: 18px;
     }
     .btn-group {
       display: flex;
@@ -95,12 +107,14 @@
       background: #444;
       color: #fff;
       border: none;
-      padding: 12px;
-      font-size: 16px;
+      padding: 10px;
+      font-size: 14px;
       border-radius: 6px;
       cursor: pointer;
       font-weight: bold;
       transition: background 0.2s, transform 0.1s;
+      /* 確保按鈕觸控不會觸發瀏覽器預設行為 */
+      touch-action: manipulation; 
     }
     button:hover {
       background: #555;
@@ -127,14 +141,16 @@
       cursor: not-allowed;
       transform: none !important;
     }
+    
+    /* 鍵盤提示預設隱藏，若為電腦版再顯示 */
     #controls {
-      margin-top: 20px;
+      display: none;
+      margin-top: 15px;
       font-size: 14px;
       color: #aaa;
       background: #111;
-      padding: 15px;
+      padding: 10px 15px;
       border-radius: 8px;
-      display: inline-block;
       line-height: 1.6;
     }
     kbd {
@@ -144,6 +160,83 @@
       padding: 2px 6px;
       color: #fff;
       font-family: monospace;
+    }
+
+    /* 手機版觸控面板 */
+    #touch-controls {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      grid-template-rows: repeat(2, 1fr);
+      gap: 10px;
+      margin-top: 20px;
+      width: 240px; /* 對齊畫布寬度 */
+      justify-items: center;
+      align-items: center;
+    }
+
+    .t-btn {
+      width: 60px;
+      height: 60px;
+      font-size: 24px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.15);
+      border: 2px solid #555;
+      color: white;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .t-btn:active {
+      background: rgba(255, 255, 255, 0.4);
+      border-color: #0CF;
+    }
+
+    /* 觸控版面配置 */
+    #btn-left { grid-column: 1; grid-row: 2; }
+    #btn-down { grid-column: 2; grid-row: 2; }
+    #btn-right { grid-column: 3; grid-row: 2; }
+    #btn-rotate { grid-column: 2; grid-row: 1; width: 70px; height: 70px; background: rgba(0, 204, 255, 0.2); border-color: #0CF;}
+    #btn-rotate:active { background: rgba(0, 204, 255, 0.5); }
+
+    /* RWD: 當螢幕比較小時，改變排版以適應手機直向 */
+    @media (max-width: 480px) {
+      #game-container {
+        flex-direction: column;
+        align-items: center;
+        padding: 10px;
+      }
+      #side-panel {
+        flex-direction: row;
+        width: 240px;
+        height: auto;
+        min-height: auto;
+        gap: 10px;
+        flex-wrap: wrap;
+      }
+      #info {
+        display: flex;
+        flex: 1 1 100%;
+        justify-content: space-between;
+        padding: 5px 10px;
+      }
+      #info p { text-align: center; }
+      #next-piece-container {
+        flex: 1;
+        margin-bottom: 0;
+      }
+      .btn-group {
+        flex: 1;
+        justify-content: center;
+      }
+      button { padding: 8px; }
+    }
+
+    /* 若為滑鼠設備(電腦)，則顯示鍵盤提示，隱藏觸控按鈕 */
+    @media (hover: hover) and (pointer: fine) {
+      #touch-controls { display: none; }
+      #controls { display: inline-block; }
     }
   </style>
 </head>
@@ -166,7 +259,7 @@
           <p><span id="ui-level-lbl">Level</span><br><span id="level">1</span></p>
         </div>
         
-        <div id="next-piece-container" style="background: #222; padding: 10px; border-radius: 8px; border: 1px solid #333; text-align: center; margin-bottom: 10px;">
+        <div id="next-piece-container" style="background: #222; padding: 10px; border-radius: 8px; border: 1px solid #333; text-align: center;">
           <div id="ui-next-lbl" style="font-size: 14px; font-weight: bold; margin-bottom: 5px; color: #aaa;">Next</div>
           <canvas id="next-piece" width="80" height="80" style="background: #000; border: 1px solid #444; border-radius: 4px; display: block; margin: 0 auto;"></canvas>
         </div>
@@ -176,6 +269,13 @@
           <button id="pause-btn" disabled>Pause</button>
         </div>
       </div>
+    </div>
+
+    <div id="touch-controls">
+      <div id="btn-rotate" class="t-btn">↻</div>
+      <div id="btn-left" class="t-btn">◀</div>
+      <div id="btn-down" class="t-btn">▼</div>
+      <div id="btn-right" class="t-btn">▶</div>
     </div>
   </div>
 
@@ -222,13 +322,10 @@
       }
     };
 
-    // 獲取使用者預設語言
     const userLang = navigator.language || navigator.userLanguage;
-    // 如果系統語言包含 'zh' (如 zh-TW, zh-CN) 則使用中文，否則預設為英文
     const currentLang = userLang.startsWith('zh') ? 'zh' : 'en';
     document.documentElement.lang = currentLang;
 
-    // 翻譯小工具函式
     function t(key, params = {}) {
       let text = i18n[currentLang][key] || key;
       for (const p in params) {
@@ -237,7 +334,6 @@
       return text;
     }
 
-    // 初始化 UI 文字
     document.title = t('title');
     document.getElementById('ui-title').innerText = t('title');
     document.getElementById('ui-score-lbl').innerText = t('score');
@@ -248,7 +344,6 @@
     document.getElementById('pause-btn').innerText = t('pause');
     document.getElementById('overlay').innerText = t('ready');
     document.getElementById('controls').innerHTML = t('controls');
-
 
     // --- 遊戲核心 ---
     const canvas = document.getElementById("tetris");
@@ -554,6 +649,7 @@
       overlay.classList.remove("hidden");
     }
 
+    // --- 事件監聽 (電腦版滑鼠與鍵盤) ---
     startBtn.addEventListener("click", () => {
       startGame();
       startBtn.blur();
@@ -580,9 +676,47 @@
       draw();
     });
 
+    // --- 事件監聽 (手機版觸控) ---
+    function setupTouchControl(btnId, action, isContinuous = false) {
+      const btn = document.getElementById(btnId);
+      let holdInterval = null;
+      let holdTimeout = null;
+
+      const startAction = (e) => {
+        if (e.cancelable) e.preventDefault(); // 防止雙點擊放大及滑鼠事件干擾
+        if (!gameRunning || isPaused) return;
+        action();
+        draw();
+
+        // 若支援長按連續觸發 (例如左右移動、加速下落)
+        if (isContinuous) {
+          holdTimeout = setTimeout(() => {
+            holdInterval = setInterval(() => {
+              action();
+              draw();
+            }, 80); // 長按觸發的間隔速度
+          }, 200); // 按住多久後開始連續觸發
+        }
+      };
+
+      const stopAction = (e) => {
+        if (e.cancelable) e.preventDefault();
+        clearTimeout(holdTimeout);
+        clearInterval(holdInterval);
+      };
+
+      btn.addEventListener("touchstart", startAction, { passive: false });
+      btn.addEventListener("touchend", stopAction, { passive: false });
+      btn.addEventListener("touchcancel", stopAction, { passive: false });
+    }
+
+    setupTouchControl("btn-left", () => playerMove(-1), true);
+    setupTouchControl("btn-right", () => playerMove(1), true);
+    setupTouchControl("btn-down", () => playerDrop(), true);
+    setupTouchControl("btn-rotate", () => playerRotate(1), false); // 旋轉通常不使用長按連續觸發
+
     draw();
 
   </script>
 </body>
 </html>
-
