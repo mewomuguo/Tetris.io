@@ -1,5 +1,6 @@
 <!DOCTYPE html>
-<html lang="en"> <head>
+<html lang="en">
+<head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"/>
   <title>Tetris</title>
@@ -14,18 +15,13 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      /* 防止整個畫面被長按選取或拖曳 */
+      /* 防止整個畫面被長按選取或拖曳，隱藏反白 */
       user-select: none;
       -webkit-user-select: none;
+      -webkit-touch-callout: none;
       touch-action: none; 
     }
-    h1 {
-      margin-top: 10px;
-      margin-bottom: 10px;
-      color: #0CF;
-      text-shadow: 0 0 10px rgba(0, 204, 255, 0.5);
-      font-size: 28px;
-    }
+    
     #game-wrapper {
       position: relative;
       display: flex;
@@ -33,6 +29,7 @@
       align-items: center;
       width: 100%;
       max-width: 500px;
+      margin-top: 10px;
     }
     #game-container {
       display: flex;
@@ -113,36 +110,16 @@
       cursor: pointer;
       font-weight: bold;
       transition: background 0.2s, transform 0.1s;
-      /* 確保按鈕觸控不會觸發瀏覽器預設行為 */
       touch-action: manipulation; 
     }
-    button:hover {
-      background: #555;
-    }
-    button:active {
-      transform: scale(0.95);
-    }
-    button#start-btn {
-      background: #28a745;
-    }
-    button#start-btn:hover {
-      background: #218838;
-    }
-    button#pause-btn {
-      background: #ffc107;
-      color: #000;
-    }
-    button#pause-btn:hover {
-      background: #e0a800;
-    }
-    button:disabled {
-      background: #333 !important;
-      color: #777 !important;
-      cursor: not-allowed;
-      transform: none !important;
-    }
+    button:hover { background: #555; }
+    button:active { transform: scale(0.95); }
+    button#start-btn { background: #28a745; }
+    button#start-btn:hover { background: #218838; }
+    button#pause-btn { background: #ffc107; color: #000; }
+    button#pause-btn:hover { background: #e0a800; }
+    button:disabled { background: #333 !important; color: #777 !important; cursor: not-allowed; transform: none !important; }
     
-    /* 鍵盤提示預設隱藏，若為電腦版再顯示 */
     #controls {
       display: none;
       margin-top: 15px;
@@ -162,45 +139,77 @@
       font-family: monospace;
     }
 
-    /* 手機版觸控面板 */
-    #touch-controls {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      grid-template-rows: repeat(2, 1fr);
-      gap: 10px;
-      margin-top: 20px;
-      width: 240px; /* 對齊畫布寬度 */
-      justify-items: center;
+    /* 手機版 Joycon 面板設計 */
+    #mobile-controls {
+      display: flex;
+      justify-content: space-between;
       align-items: center;
+      width: 100%;
+      max-width: 380px;
+      margin-top: 20px;
+      padding: 0 10px;
+      box-sizing: border-box;
     }
 
-    .t-btn {
-      width: 60px;
-      height: 60px;
-      font-size: 24px;
-      border-radius: 50%;
+    /* 左側十字鍵 (D-Pad) */
+    .joycon-dpad {
+      display: grid;
+      grid-template-columns: 55px 55px 55px;
+      grid-template-rows: 55px 55px 55px;
+      gap: 2px;
+    }
+
+    .dpad-btn {
       background: rgba(255, 255, 255, 0.15);
       border: 2px solid #555;
       color: white;
+      font-size: 20px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
+      border-radius: 8px;
+    }
+    .dpad-btn:active {
+      background: rgba(255, 255, 255, 0.4);
+      border-color: #0CF;
+    }
+    /* 十字鍵中心裝飾 */
+    .dpad-center {
+      background: #222;
+      border: 2px solid #444;
+      border-radius: 4px;
+    }
+
+    /* 右側動作鍵 (旋轉) */
+    .joycon-action {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 100px;
+      height: 100px;
+    }
+    .action-btn {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      background: rgba(0, 204, 255, 0.2);
+      border: 3px solid #0CF;
+      color: white;
+      font-size: 28px;
       display: flex;
       justify-content: center;
       align-items: center;
       user-select: none;
       -webkit-tap-highlight-color: transparent;
     }
-    .t-btn:active {
-      background: rgba(255, 255, 255, 0.4);
-      border-color: #0CF;
+    .action-btn:active {
+      background: rgba(0, 204, 255, 0.5);
+      transform: scale(0.95);
     }
 
-    /* 觸控版面配置 */
-    #btn-left { grid-column: 1; grid-row: 2; }
-    #btn-down { grid-column: 2; grid-row: 2; }
-    #btn-right { grid-column: 3; grid-row: 2; }
-    #btn-rotate { grid-column: 2; grid-row: 1; width: 70px; height: 70px; background: rgba(0, 204, 255, 0.2); border-color: #0CF;}
-    #btn-rotate:active { background: rgba(0, 204, 255, 0.5); }
-
-    /* RWD: 當螢幕比較小時，改變排版以適應手機直向 */
+    /* RWD 適應手機排版 */
     @media (max-width: 480px) {
       #game-container {
         flex-direction: column;
@@ -233,17 +242,15 @@
       button { padding: 8px; }
     }
 
-    /* 若為滑鼠設備(電腦)，則顯示鍵盤提示，隱藏觸控按鈕 */
+    /* 電腦版隱藏手把 */
     @media (hover: hover) and (pointer: fine) {
-      #touch-controls { display: none; }
+      #mobile-controls { display: none; }
       #controls { display: inline-block; }
     }
   </style>
 </head>
 <body>
 
-  <h1 id="ui-title">Tetris</h1>
-  
   <div id="game-wrapper">
     <div id="game-container">
       <div id="canvas-container">
@@ -271,11 +278,25 @@
       </div>
     </div>
 
-    <div id="touch-controls">
-      <div id="btn-rotate" class="t-btn">↻</div>
-      <div id="btn-left" class="t-btn">◀</div>
-      <div id="btn-down" class="t-btn">▼</div>
-      <div id="btn-right" class="t-btn">▶</div>
+    <div id="mobile-controls">
+      
+      <div class="joycon-dpad">
+        <div style="grid-column: 1; grid-row: 1;"></div>
+        <div style="grid-column: 2; grid-row: 1;"></div> <div style="grid-column: 3; grid-row: 1;"></div>
+        
+        <div id="btn-left" class="dpad-btn" style="grid-column: 1; grid-row: 2; border-radius: 15px 4px 4px 15px;">◀</div>
+        <div class="dpad-center" style="grid-column: 2; grid-row: 2;"></div>
+        <div id="btn-right" class="dpad-btn" style="grid-column: 3; grid-row: 2; border-radius: 4px 15px 15px 4px;">▶</div>
+        
+        <div style="grid-column: 1; grid-row: 3;"></div>
+        <div id="btn-down" class="dpad-btn" style="grid-column: 2; grid-row: 3; border-radius: 4px 4px 15px 15px;">▼</div>
+        <div style="grid-column: 3; grid-row: 3;"></div>
+      </div>
+
+      <div class="joycon-action">
+        <div id="btn-rotate" class="action-btn">↻</div>
+      </div>
+
     </div>
   </div>
 
@@ -285,7 +306,6 @@
     // --- 語言與 i18n 系統 ---
     const i18n = {
       en: {
-        title: "Tetris",
         score: "Score",
         lines: "Lines",
         level: "Level",
@@ -303,7 +323,6 @@
         tspinLines: "T-Spin {n} Lines!"
       },
       zh: {
-        title: "俄羅斯方塊 Tetris",
         score: "分數",
         lines: "消除行數",
         level: "等級",
@@ -334,8 +353,6 @@
       return text;
     }
 
-    document.title = t('title');
-    document.getElementById('ui-title').innerText = t('title');
     document.getElementById('ui-score-lbl').innerText = t('score');
     document.getElementById('ui-lines-lbl').innerText = t('lines');
     document.getElementById('ui-level-lbl').innerText = t('level');
@@ -650,15 +667,8 @@
     }
 
     // --- 事件監聽 (電腦版滑鼠與鍵盤) ---
-    startBtn.addEventListener("click", () => {
-      startGame();
-      startBtn.blur();
-    });
-
-    pauseBtn.addEventListener("click", () => {
-      togglePause();
-      pauseBtn.blur();
-    });
+    startBtn.addEventListener("click", () => { startGame(); startBtn.blur(); });
+    pauseBtn.addEventListener("click", () => { togglePause(); pauseBtn.blur(); });
 
     document.addEventListener("keydown", event => {
       if (event.code === "Space") {
@@ -676,26 +686,27 @@
       draw();
     });
 
-    // --- 事件監聽 (手機版觸控) ---
+    // --- 事件監聽 (手機版 Pointer 觸控，解決無反應問題) ---
     function setupTouchControl(btnId, action, isContinuous = false) {
       const btn = document.getElementById(btnId);
+      if (!btn) return;
+
       let holdInterval = null;
       let holdTimeout = null;
 
       const startAction = (e) => {
-        if (e.cancelable) e.preventDefault(); // 防止雙點擊放大及滑鼠事件干擾
+        if (e.cancelable) e.preventDefault(); 
         if (!gameRunning || isPaused) return;
         action();
         draw();
 
-        // 若支援長按連續觸發 (例如左右移動、加速下落)
         if (isContinuous) {
           holdTimeout = setTimeout(() => {
             holdInterval = setInterval(() => {
               action();
               draw();
-            }, 80); // 長按觸發的間隔速度
-          }, 200); // 按住多久後開始連續觸發
+            }, 80); 
+          }, 200); 
         }
       };
 
@@ -705,15 +716,20 @@
         clearInterval(holdInterval);
       };
 
-      btn.addEventListener("touchstart", startAction, { passive: false });
-      btn.addEventListener("touchend", stopAction, { passive: false });
-      btn.addEventListener("touchcancel", stopAction, { passive: false });
+      // 替換 touchstart 為 pointer 系列事件，大幅增加點擊反應率
+      btn.addEventListener("pointerdown", startAction);
+      btn.addEventListener("pointerup", stopAction);
+      btn.addEventListener("pointerleave", stopAction);
+      btn.addEventListener("pointercancel", stopAction);
+      
+      // 防止部分手機長按跳出右鍵選單
+      btn.addEventListener("contextmenu", e => e.preventDefault());
     }
 
     setupTouchControl("btn-left", () => playerMove(-1), true);
     setupTouchControl("btn-right", () => playerMove(1), true);
     setupTouchControl("btn-down", () => playerDrop(), true);
-    setupTouchControl("btn-rotate", () => playerRotate(1), false); // 旋轉通常不使用長按連續觸發
+    setupTouchControl("btn-rotate", () => playerRotate(1), false); // 旋轉為單點擊
 
     draw();
 
